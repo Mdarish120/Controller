@@ -1,54 +1,52 @@
-import {db} from "../utils/db.js";
 
-export const getUser=(_,res)=>{
-    const query="SELECT * FROM  USERINFO";
-    db.query(query,(err,data)=>{
-        if(err){
-            return res.json(err);
-        }
+import db from "../models/index.js";
 
-        return res.status(200).json(data);
-    })
+const User=db.userInfo;
+
+export const getUser= async(req,res)=>{
+  
+    try {
+          const user=await User.findAll({});
+          res.status(200).json(user);
+    } catch (error) {
+        console.log(error);
+    }
 }
 
-export const createUser=(req,res)=>{
+export const createUser= async(req,res)=>{
     
   const {name,email}=req.body;
-    const query="INSERT INTO userinfo(`name`,`email`) VALUES(?)";
-
-    const values=[
-        name,email
-    ]
-    db.query(query,[values],(err)=>{
-        if(err) return res.json(err);
-
-        return res.status(200).json("User is created Successfully..")
-    })
+    try {
+        const data=await User.create({name,email});
+        res.status(201).json("adding scuccessfully..");
+        
+    } catch (error) {
+         console.log(error);
+    }
 
 }
 
 
-export const updateUser=(req,res)=>{
+export const updateUser= async (req,res)=>{
     const {name,email}=req.body;
     const {id}=req.params;
-    const query="UPDATE userInfo SET `name`=? ,`email`=? WHERE `id`=?";
-    const values=[name,email];
+     
+    try { 
 
-    db.query(query,[...values,id], (err)=>{
-        if(err) return res.json(err);
-        return res.status(200).json("Updated Successfully..");
-    })
+        const data=await User.update({name,email},{where:{id:id}});
+        res.status(200).json(data);
+        
+    } catch (error) {
+        
+    }
 
   
   }
 
-  export const deleteUser=(req,res)=>{
-   const query="DELETE FROM userInfo WHERE `id`=?"
-
-   db.query(query,[req.params.id],(err)=>{
-
-    if(err) return res.json(err);
-     return res.status(200).json("Successfully Deleted..")
-   })
+  export const deleteUser= async(req,res)=>{
+  const {id }=req.params;
+    
+  await User.destroy({where:{id:id}});
+  res.status(200).json("deleted Successfully...")
   
   }
